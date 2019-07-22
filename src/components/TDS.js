@@ -6,6 +6,9 @@ import Paper from "@material-ui/core/Paper";
 import Grid from '@material-ui/core/Grid';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Button from '@material-ui/core/Button';
+import MenuItem from '@material-ui/core/MenuItem';
+import TextField from '@material-ui/core/TextField';
+import { border } from '@material-ui/system';
 
 const styles = theme => ({
     paper: {
@@ -27,6 +30,16 @@ const styles = theme => ({
 class TDS extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {
+            showChangeTicketNo : false
+        }
+    }
+
+    onEnvChange = (event) => {
+        console.log(event.target.value);
+        if(event.target.value === 'prod'){
+            this.setState({showChangeTicketNo : true});
+        }   
     }
 
     render() {
@@ -116,27 +129,58 @@ class TDS extends React.Component {
                     <Paper className={classes.root} style={{margin: "15px 30px", backgroundColor:"#f2f2f2", height: "50px"}}>
                     <Grid item xs={4}>
                         <Typography component="p" style={{padding: "15px 0px", textAlign: 'center'}}>
-                            Change Ticket No
+                            Environment
                         </Typography>
                     </Grid>
                     <Grid item xs={8}>
-                    <InputBase
-                        id="changeTicketNo"
-                        value={""}
-                        variant="outlined"
+                    <select
+                        id="environment"
+                        value="Select"
                         style={{
                             float: 'left',
                             backgroundColor: 'white',
                             borderRadius: '5px',
                             width: '300px',
                             alignItems: 'left',
-                            padding: '5px',
-                            margin: '3px'
+                            padding: '12px',
+                            margin: '3px',
+                            border: 'none'
                         }}
-                        onChange={""}
-                    />
+                        onChange={this.onEnvChange}
+                    >
+                        <option value="unit">Unit</option>
+                        <option value="test_state">Test Stage</option>
+                        <option value="prod">Prod</option>
+                    </select>
                     </Grid>
                     </Paper>
+                    { this.state.showChangeTicketNo && 
+                        <Paper className={classes.root} style={{margin: "15px 30px", backgroundColor:"#f2f2f2", height: "50px"}}>
+                        <Grid item xs={4}>
+                            <Typography component="p" style={{padding: "15px 0px", textAlign: 'center'}}>
+                                Change Ticket No
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={8}>
+                        <InputBase
+                            id="changeTicketNo"
+                            value={""}
+                            variant="outlined"
+                            style={{
+                                float: 'left',
+                                backgroundColor: 'white',
+                                borderRadius: '5px',
+                                width: '300px',
+                                alignItems: 'left',
+                                padding: '5px',
+                                margin: '3px'
+                            }}
+                            onChange={""}
+                        />
+                        </Grid>
+                        </Paper>
+                    }
+                    
                     <Paper className={classes.root} style={{margin: "15px 30px", backgroundColor:"#f2f2f2", height: "50px"}}>
                     <Grid item xs={4}>
                         <Typography component="p" style={{padding: "15px 0px", textAlign: 'center'}}>
@@ -148,6 +192,7 @@ class TDS extends React.Component {
                         id="expectedProdDate"
                         value={""}
                         variant="outlined"
+                        type="date"
                         style={{
                             float: 'left',
                             backgroundColor: 'white',

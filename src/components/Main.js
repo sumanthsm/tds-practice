@@ -20,6 +20,7 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import HomeIcon from '@material-ui/icons/Home';
 import MenuIcon from '@material-ui/icons/Menu';
 import EditIcon from '@material-ui/icons/Edit';
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import TDS from './TDS';
 import Home from './Home';
 
@@ -146,7 +147,10 @@ class Main extends React.Component {
                 <main className={classes.content}>
                     <div className={classes.toolbar} />
                     <div className={classes.toolbar} />
-                    <Home />
+                    <Router>
+                        <Route path="/" exact component={TDS} />
+                        <Route path="/home" component={Home} />
+                    </Router>
                 </main>
             </div>
         );
