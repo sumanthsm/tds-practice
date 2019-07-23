@@ -39,6 +39,8 @@ class TDS extends React.Component {
         console.log(event.target.value);
         if(event.target.value === 'prod'){
             this.setState({showChangeTicketNo : true});
+        }else{
+            this.setState({showChangeTicketNo : false});
         }   
     }
 
@@ -212,14 +214,36 @@ class TDS extends React.Component {
                     </Grid>
                     </Paper>
                     <Paper className={classes.root} style={{margin: "15px 30px", backgroundColor:"#f2f2f2", height: "50px"}}>
-                    <Grid item xs={4}>
+                    <Grid item xs={3}>
                         <Typography component="p" style={{padding: "15px 0px", textAlign: 'center'}}>
-                            Email Id
+                            From Email Id
                         </Typography>
                     </Grid>
-                    <Grid item xs={8}>
+                    <Grid item xs={3}>
                     <InputBase
-                        id="emailId"
+                        id="fromEmailId"
+                        value={""}
+                        variant="outlined"
+                        style={{
+                            float: 'left',
+                            backgroundColor: 'white',
+                            borderRadius: '5px',
+                            width: '300px',
+                            alignItems: 'left',
+                            padding: '5px',
+                            margin: '3px'
+                        }}
+                        onChange={""}
+                    />
+                    </Grid>
+                    <Grid item xs={3}>
+                        <Typography component="p" style={{padding: "15px 0px", textAlign: 'center'}}>
+                            To Email Id
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={3}>
+                    <InputBase
+                        id="toEmailId"
                         value={""}
                         variant="outlined"
                         style={{
