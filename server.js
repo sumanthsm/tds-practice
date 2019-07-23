@@ -42,149 +42,24 @@ app.get('/api/projectdata:id', (req, res) => {
     res.json(result);
 });
 
-app.get('/api/getappdata:id', (req, res) => {
-    console.log(req.params, "params");
-    
-    let result = {};
-    let appData = convertProjectDataToJson();
-    for (let i = 0; i < appData.length; i++) {
-        let appId = appData[i]['appId'];
-        if (appId == req.params.id) {
-            result = appData[i];
-        }
-    }
-    res.json(result);
-});
-
-app.post('/api/shortcutsdata', (req, res) => {
-    const fields = ['appId', 'appAbrv', 'appName', 'appDesc', 'appUrl', 'appContactEmail'];
+app.post('/api/updatestatus', (req, res) => {
+    const fields = ['id', 'name', 'dataSource', 'type', 'status', 'comment'];
     const opts = { fields };
-
-    let appData = convertProjectDataToJson();
-    let shortcutsData = convertShortcutsDataToJson();
-    const appId = req.body.appId;
-    let flag = false;
-    if(shortcutsData){
-        flag = false;
-    }else{
-        for(let i = 0; i < shortcutsData.length; i++){
-            if(shortcutsData[i].appId === appId){
-                flag = true;
-            }
-        }   
-    }
-
-    if (flag) {
-        res.json({ 'status': 'fail', 'msg': 'Data already exists' });
-    } else {
-        for (let i = 0; i < appData.length; i++) {
-            if (appData[i].appId === appId) {
-                shortcutsData.push(appData[i]);
-            }
-        }
-
-        fs.writeFile("./data/shortcutsdata.csv", json2csv(shortcutsData, opts), function (err) {
-            if (err) {
-                throw err;
-            }
-        });
-        res.json({ 'status': 'success', 'msg': 'Data added successfully' });
-    }
-});
-
-app.post('/api/deleteshortcut', (req, res) => {
-    const fields = ['appId', 'appAbrv', 'appName', 'appDesc', 'appUrl', 'appContactEmail'];
-    const opts = { fields };
-    let shortcutsData = convertShortcutsDataToJson();
-    const appId = req.body.appId;
-    console.log(appId, "appId");
+    let projectData = convertProjectDataToJson();
+    const data = req.body.data;
+    const id = req.body.data.id;
+    const status = req.body.data.status;
+    const comment = req.body.data.comment;
+    console.log(data, "data");
     
-    const result = shortcutsData.filter((shortcut) => shortcut.appId !== appId);
-    // for(let i = 0; i < shortcutsData.length; i++){
-    //     if(shortcutsData[i].appId === appId){
-    //         flag = true;
-    //     }
-    // }
-    console.log(result, "result");
-    
-    fs.writeFile("./data/shortcutsdata.csv", json2csv(result, opts), function (err) {
-        if (err) {
-            throw err;
-        }
-    });
-    res.json({'status': 'success', 'msg' : 'Shortcut deleted successfully'});
-});
-
-app.post('/api/deleteapp', (req, res) => {
-    const fields = ['appId', 'appAbrv', 'appName', 'appDesc', 'appUrl', 'appContactEmail'];
-    const opts = { fields };
-    let appData = convertProjectDataToJson();
-    const appId = req.body.appId;
-    const result = appData.filter((app) => app.appId !== appId);
-    console.log(result, "result");
-    
-    fs.writeFile("./data/appdata.csv", json2csv(result, opts), function (err) {
-        if (err) {
-            throw err;
-        }
-    });
-    res.json({'status': 'success', 'msg' : 'App deleted successfully'});
-});
-
-app.post('/api/createapp', (req, res) => {
-    const fields = ['appId', 'appAbrv', 'appName', 'appDesc', 'appUrl', 'appContactEmail'];
-    const opts = { fields };
-    let flag = 0;
-    let appData = convertProjectDataToJson();
-    const newAppData = req.body.data;
-    
-    for(let i=0;i<appData.length;i++){
-        if(appData[i]['appId'] === newAppData['appId']){
-            console.log('if new app data');
-            flag = 1;
+    for(let i=0;i<projectData.length;i++){
+        if(projectData[i]['id'] == id){
+            projectData[i]['status'] = status;
+            projectData[i]['comment'] = comment;
             break;
         }
     }
-
-    if(flag === 0){
-        console.log("flag true");
-        appData.push(newAppData);
-        fs.writeFile("./data/appdata.csv", json2csv(appData, opts), function (err) {
-            if (err) {
-                throw err;
-            }
-        });
-        res.json({'status': 'success'});
-    }else{
-        console.log("flag false");
-        res.json({'status': 'fail'});
-    }
-});
-
-
-app.post('/api/editapp', (req, res) => {
-    const fields = ['appId', 'appAbrv', 'appName', 'appDesc', 'appUrl', 'appContactEmail'];
-    const opts = { fields };
-    let appData = convertProjectDataToJson();
-    const newAppData = req.body.data;
-    console.log(appData, "appdata");
-    console.log(newAppData, "newappdata");
-    
-    for(let i=0;i<appData.length;i++){
-        if(appData[i]['appId'] === newAppData['appId']){
-            appData[i]['appId'] = newAppData['appId'];
-            appData[i]['appAbrv'] = newAppData['appAbrv'];
-            appData[i]['appName'] = newAppData['appName'];
-            appData[i]['appDesc'] = newAppData['appDesc'];
-            appData[i]['appUrl'] = newAppData['appUrl'];
-            appData[i]['appContactEmail'] = newAppData['appContactEmail'];
-            console.log(i, "inside if");
-            break;
-        }
-    }
-    
-
-    fs.writeFile("./data/appdata.csv", json2csv(appData, opts), function (err) {
+    fs.writeFile("./data/projectdata.csv", json2csv(projectData, opts), function (err) {
         if (err) {
             throw err;
         }

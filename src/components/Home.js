@@ -8,13 +8,18 @@ import Divider from '@material-ui/core/Divider';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import EditIcon from '@material-ui/icons/Edit';
+import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
+import ErrorRoundedIcon from '@material-ui/icons/ErrorRounded';
+import CloseRoundedIcon from '@material-ui/icons/CloseRounded';
 import Fab from '@material-ui/core/Fab';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
+import Tooltip from '@material-ui/core/Tooltip';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const styles = theme => ({
     root: {
@@ -54,7 +59,9 @@ class Home extends React.Component {
             statusValues: ["Approved", "Pending", "Rejected", "Disputed"],
             projectData: [],
             selectedProject : {},
-            isDialogOpen: false
+            isDialogOpen: false,
+            projectStatus: '',
+            projectComment: ''
         }
     }
 
@@ -90,14 +97,59 @@ class Home extends React.Component {
         this.setState({ isDialogOpen: false });
     }
 
+    handleTextAreaInputChange = (e) => {
+        this.setState({projectComment: e.target.value});
+    }
+
     updateProjectStatus = (id) => {
         this.getProjectDataById(id);
         this.setState({ isDialogOpen: true });
     }
 
+    onStatusChange = (e) => {
+        console.log(e.target.value);
+        this.setState({projectStatus: e.target.value});
+    }
+
+    handleSubmit = () => {
+        console.log(this.state, "state");
+        
+        const {selectedProject, projectStatus, projectComment} = this.state;
+        const dataObj = {id: selectedProject.id, status: projectStatus, comment: projectComment};
+        axios.post('http://localhost:5000/api/updatestatus', { data: dataObj })
+            .then((response) => {
+                console.log(response, "res");
+                
+                if (response.data.status === 'success') {
+                    this.getProjectData();
+                    Swal.fire({
+                        type: 'success',
+                        title: 'Project status updated successfully.',
+                        showConfirmButton: false,
+                        timer: 1500
+                    })
+                    this.setState({
+                        selectedProject: {},
+                        projectStatus: '',
+                        projectComment: '',
+                        isDialogOpen: false
+                    })
+                } else if (response.data.status === 'fail') {
+                    // Swal.fire({
+                    //     type: 'error',
+                    //     title: 'Oops...',
+                    //     text: 'Project Id is already exist.',
+                    // })
+                }
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
     render() {
         const { classes } = this.props;
-        const { projectData, isDialogOpen, selectedProject } = this.state;
+        const { projectData, isDialogOpen, selectedProject, projectStatus, projectComment } = this.state;
         return (
             <div style={{ marginTop: '-40px' }}>
                 <h3 style={{ marginLeft: '30px' }}>List of DataSources</h3>
@@ -173,7 +225,9 @@ class Home extends React.Component {
                                             <span>{project.type}</span>
                                         </Grid>
                                         <Grid item xs={2}>
-                                            <span>{project.status}</span>
+                                            {project.status == 'Approved' && <Tooltip title={project.status} placement="top"><CheckCircleRoundedIcon style={{color: 'green'}} title={project.status}/></Tooltip>}
+                                            {(project.status == 'Rejected' || project.status == 'Disputed') && <Tooltip title={project.status} placement="top"><CloseRoundedIcon style={{color: 'red'}}/></Tooltip>}
+                                            {(project.status == 'Pending' || project.status == 'In Review') && <Tooltip title={project.status} placement="top"><ErrorRoundedIcon style={{color: 'yellow'}}/></Tooltip>}
                                         </Grid>
                                         <Grid item xs={2} style={{ marginTop: '-18px' }}>
                                             <Fab aria-label="Edit" style={{ backgroundColor: '#00b3b3', color: 'white', width: '35px', height: '35px' }} className={classes.fab} onClick={() => this.updateProjectStatus(project.id)}>
@@ -217,7 +271,7 @@ class Home extends React.Component {
                             <p style={{ paddingLeft: '10px' }}>Status *</p>
                             <select
                                 id="status"
-                                defaultValue={selectedProject.status}
+                                defaultValue={projectStatus}
                                 style={{
                                     backgroundColor: 'white',
                                     borderRadius: '5px',
@@ -227,7 +281,7 @@ class Home extends React.Component {
                                     margin: '3px',
                                     border: '1px solid rgba(0, 0, 0, 0.12)'
                                 }}
-                                onChange={this.onEnvChange}
+                                onChange={this.onStatusChange}
                             >
                                 <option value="Approved">Approved</option>
                                 <option value="Disputed">Disputed</option>
@@ -237,12 +291,14 @@ class Home extends React.Component {
                             <p style={{ paddingLeft: '10px' }}>Comment *</p>
                             <textarea
                                 rows={8}
+                                value={projectComment}
                                 style={{
                                     backgroundColor: 'white',
                                     borderRadius: '10px',
                                     width: '100%',
                                     border: '1px solid rgba(0, 0, 0, 0.12)'
                                 }}
+                                onChange={this.handleTextAreaInputChange}
                             ></textarea>
                             <p style={{ paddingLeft: '10px' }}>Comment about the resolution of the status</p>
                         </DialogContent>
@@ -253,7 +309,7 @@ class Home extends React.Component {
                             <Button
                                 variant="outlined"
                                 style={{ backgroundColor: '#00b3b3', color: 'white' }}
-                                onClick={""}
+                                onClick={this.handleSubmit}
                             >
                                 <span style={{ padding: '0 15px' }}>Submit</span>
                             </Button>
